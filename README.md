@@ -24,6 +24,8 @@
 ### Задание 1
 
 ![скрин 1](https://github.com/freddy7753/git/blob/main/img/img21.png)
+![скрин 2](https://github.com/freddy7753/git/blob/main/img/img22.png)
+![скрин 3](https://github.com/freddy7753/git/blob/main/img/img23.png)
 
 1. `Заполните здесь этапы выполнения, если требуется ....`
 2. `Заполните здесь этапы выполнения, если требуется ....`
@@ -47,7 +49,8 @@
 
 ### Задание 2
 
-[ссылка на commit 2](https://github.com/freddy7753/git/commit/71eda839031eebe3c73e9ddffaa7e434f56c60d0)
+![скрин 1](https://github.com/freddy7753/git/blob/main/img/img24.png)
+![скрин 2](https://github.com/freddy7753/git/blob/main/img/img25.png)
 
 1. `Заполните здесь этапы выполнения, если требуется ....`
 2. `Заполните здесь этапы выполнения, если требуется ....`
