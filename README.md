@@ -1,4 +1,4 @@
-# Домашнее задание к занятию "`Git`" - `Наурзгалиев Фарид`
+# Домашнее задание к занятию "`GitLab`" - `Наурзгалиев Фарид`
 
 ### Инструкция по выполнению домашнего задания
 
@@ -23,9 +23,7 @@
 
 ### Задание 1
 
-![скрин 1](https://github.com/freddy7753/git/blob/main/img/img21.png)
-![скрин 2](https://github.com/freddy7753/git/blob/main/img/img22.png)
-![скрин 3](https://github.com/freddy7753/git/blob/main/img/img23.png)
+![скрин 1](https://github.com/freddy7753/git/blob/main/img/img26.png)
 
 1. `Заполните здесь этапы выполнения, если требуется ....`
 2. `Заполните здесь этапы выполнения, если требуется ....`
@@ -49,8 +47,7 @@
 
 ### Задание 2
 
-![скрин 1](https://github.com/freddy7753/git/blob/main/img/img24.png)
-![скрин 2](https://github.com/freddy7753/git/blob/main/img/img25.png)
+![скрин 1](https://github.com/freddy7753/git/blob/main/img/img27.png)
 
 1. `Заполните здесь этапы выполнения, если требуется ....`
 2. `Заполните здесь этапы выполнения, если требуется ....`
@@ -60,11 +57,23 @@
 6.
 
 ```
-Поле для вставки кода...
-....
-....
-....
-....
+stages:
+  - test
+  - build
+
+test:
+  stage: test
+  image: golang:1.17
+  script:
+    - go test .
+
+build:
+  stage: build
+  image: docker:latest
+  script:
+    - docker build .
+
+
 ```
 
 `При необходимости прикрепитe сюда скриншоты
@@ -73,8 +82,6 @@
 ---
 
 ### Задание 3
-
-[Граф коммитов](https://github.com/freddy7753/git/network)
 
 1. `Заполните здесь этапы выполнения, если требуется ....`
 2. `Заполните здесь этапы выполнения, если требуется ....`
