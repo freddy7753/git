@@ -1,4 +1,4 @@
-# Домашнее задание к занятию "`Кластеризация и балансировка нагрузки`" - `Наурзгалиев Фарид`
+# Домашнее задание к занятию "`Резервное копирование`" - `Наурзгалиев Фарид`
 
 ### Инструкция по выполнению домашнего задания
 
@@ -23,80 +23,11 @@
 
 ### Задание 1
 
-![скрин 1](https://github.com/freddy7753/git/blob/main/img/img48.png)
+![скрин 1](https://github.com/freddy7753/git/blob/main/img/img50.png)
 
 1. `Заполните здесь этапы выполнения, если требуется ....`
-2. `Заполните здесь этапы выполнения, если требуется ....`
-3. `Заполните здесь этапы выполнения, если требуется ....`
-4. `Заполните здесь этапы выполнения, если требуется ....`
-5. `Заполните здесь этапы выполнения, если требуется ....`
-6.
 
 ```sh
-global
-        log /dev/log    local0
-        log /dev/log    local1 notice
-        chroot /var/lib/haproxy
-        stats socket /run/haproxy/admin.sock mode 660 level admin expose-fd lis>
-        stats timeout 30s
-        user haproxy
-        group haproxy
-        daemon
-
-        # Default SSL material locations
-        ca-base /etc/ssl/certs
-        crt-base /etc/ssl/private
-
-        # See: https://ssl-config.mozilla.org/#server=haproxy&server-version=2.>
-        ssl-default-bind-ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128>
-        ssl-default-bind-ciphersuites TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SH>
-        ssl-default-bind-options ssl-min-ver TLSv1.2 no-tls-tickets
-
-defaults
-        log     global
-        mode    http
-        option  httplog
-        option  dontlognull
-        timeout connect 5000
-        timeout client  50000
-        timeout server  50000
-        errorfile 400 /etc/haproxy/errors/400.http
-        errorfile 403 /etc/haproxy/errors/403.http
-        errorfile 408 /etc/haproxy/errors/408.http
-        errorfile 500 /etc/haproxy/errors/500.http
-        errorfile 502 /etc/haproxy/errors/502.http
-        errorfile 503 /etc/haproxy/errors/503.http
-        errorfile 504 /etc/haproxy/errors/504.http
-
-listen stats # веб-страница со статистикой
-        bind           :888
-        mode           http
-        stats          enable
-        stats uri      /stats
-        stats refresh  5s
-        stats realm    Haproxy\ Statistics
-
-frontend example # секция фронтенд
-        mode http
-        bind :8088
-#        default_backend web_servers
-        acl ACL_example.com hdr(host) -i example.com
-        use_backend web_servers if ACL_example.com
-
-backend web_servers # секция бэкенд
-        mode http
-        balance roundrobin
-        option httpchk
-        http-check send meth GET uri /index.html
-        server s1 127.0.0.1:8888 check
-        server s2 127.0.0.1:9999 check
-
-listen wep_tcp
-        bind :1325
-        server s1 127.0.0.1:8888 check inter 3s
-        server s2 127.0.0.1:9999 check inter 3s
-
-
 
 ```
 
@@ -107,76 +38,37 @@ listen wep_tcp
 
 ### Задание 2
 
-![скрин 1](https://github.com/freddy7753/git/blob/main/img/img49.png)
+![скрин 1](https://github.com/freddy7753/git/blob/main/img/img51.png)
 
 1. `Заполните здесь этапы выполнения, если требуется ....`
-2. `Заполните здесь этапы выполнения, если требуется ....`
-3. `Заполните здесь этапы выполнения, если требуется ....`
-4. `Заполните здесь этапы выполнения, если требуется ....`
-5. `Заполните здесь этапы выполнения, если требуется ....`
-6.
 
 ```sh
-  GNU nano 6.2                /etc/haproxy/haproxy.cfg
-global
-        log /dev/log    local0
-        log /dev/log    local1 notice
-        chroot /var/lib/haproxy
-        stats socket /run/haproxy/admin.sock mode 660 level admin expose-fd lis>
-        stats timeout 30s
-        user haproxy
-        group haproxy
-        daemon
+  GNU nano 6.2                      /tmp/crontab.TEs165/crontab *
+# Edit this file to introduce tasks to be run by cron.
+#
+# Each task to run has to be defined through a single line
+# indicating with different fields when the task will be run
+# and what command to run for the task
+#
+# To define the time you can provide concrete values for
+# minute (m), hour (h), day of month (dom), month (mon),
+# and day of week (dow) or use '*' in these fields (for 'any').
+#
+# Notice that tasks will be started based on the cron's system
+# daemon's notion of time and timezones.
+#
+# Output of the crontab jobs (including errors) is sent through
+# email to the user the crontab file belongs to (unless redirected).
+#
+# For example, you can run a backup of all your user accounts
+# at 5 a.m every week with:
+# 0 5 * * 1 tar -zcf /var/backups/home.tgz /home/
+#
+# For more information see the manual pages of crontab(5) and cron(8)
+#
+# m h  dom mon dow   command
 
-        # Default SSL material locations
-        ca-base /etc/ssl/certs
-        crt-base /etc/ssl/private
-
-        # See: https://ssl-config.mozilla.org/#server=haproxy&server-version=2.>
-        ssl-default-bind-ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128>
-        ssl-default-bind-ciphersuites TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SH>
-        ssl-default-bind-options ssl-min-ver TLSv1.2 no-tls-tickets
-
-defaults
-        log     global
-        mode    http
-        option  httplog
-        option  dontlognull
-        timeout connect 5000
-        timeout client  50000
-        timeout server  50000
-        errorfile 400 /etc/haproxy/errors/400.http
-        errorfile 403 /etc/haproxy/errors/403.http
-        errorfile 408 /etc/haproxy/errors/408.http
-        errorfile 500 /etc/haproxy/errors/500.http
-        errorfile 502 /etc/haproxy/errors/502.http
-        errorfile 503 /etc/haproxy/errors/503.http
-        errorfile 504 /etc/haproxy/errors/504.http
-
-listen stats # веб-страница со статистикой
-        bind           :888
-        mode           http
-        stats          enable
-        stats uri      /stats
-        stats refresh  5s
-        stats realm    Haproxy\ Statistics
-
-frontend example # секция фронтенд
-        mode http
-        bind :8088
-#        default_backend web_servers
-        acl ACL_example.local hdr(host) -i example.local
-        use_backend web_servers if ACL_example.local
-
-backend web_servers # секция бэкенд
-        mode http
-        balance roundrobin
-        option httpchk
-        http-check send meth GET uri /index.html
-        server s1 127.0.0.1:8888 check weight 2
-        server s2 127.0.0.1:9999 check weight 3
-        server s3 127.0.0.1:11111 check weight 4
-
+* * * * * bash /bin/bash /home/freddy/backup_home.sh >> /var/log/backup.log 2>&1
 ```
 
 `При необходимости прикрепитe сюда скриншоты
