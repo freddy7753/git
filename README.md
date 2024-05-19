@@ -1,4 +1,4 @@
-# Домашнее задание к занятию "`SQL. Часть 1`" - `Наурзгалиев Фарид`
+# Домашнее задание к занятию "`SQL. Часть 2`" - `Наурзгалиев Фарид`
 
 ### Инструкция по выполнению домашнего задания
 
@@ -24,23 +24,26 @@
 ### Задание 1
 
 ```
-Получите уникальные названия районов из таблицы с адресами, которые начинаются на “K” и заканчиваются на “a” и не содержат пробелов.
+Одним запросом получите информацию о магазине, в котором обслуживается более 300 покупателей, и выведите в результат следующую информацию:
+
+фамилия и имя сотрудника из этого магазина;
+город нахождения магазина;
+количество пользователей, закреплённых в этом магазине.
 ```
 
 ```sql
-SELECT DISTINCT district FROM address WHERE district LIKE 'K%a' AND district NOT LIKE '% %';
+SELECT CONCAT(s2.first_name, ' ', s2.last_name) AS name, c.city, COUNT(c2.customer_id) AS customers_count
+FROM store s
+INNER JOIN staff s2 ON s.store_id = s2.store_id
+INNER JOIN address a ON s.address_id = a.address_id
+INNER JOIN city c ON a.city_id = c.city_id
+INNER JOIN customer c2 ON s.store_id  = c2.store_id
+GROUP BY s2.first_name, s2.last_name, c.city
+HAVING COUNT(c2.customer_id) > 300;
 
-+-----------+
-| district  |
-+-----------+
-| Kanagawa  |
-| Kalmykia  |
-| Kaduna    |
-| Karnataka |
-| K�tahya  |
-| Kerala    |
-| Kitaa     |
-+-----------+
+name        |city      |customers_count|
+------------+----------+---------------+
+Mike Hillyer|Lethbridge|            326|
 ```
 
 ---
@@ -48,25 +51,17 @@ SELECT DISTINCT district FROM address WHERE district LIKE 'K%a' AND district NOT
 ### Задание 2
 
 ```sh
-Получите из таблицы платежей за прокат фильмов информацию по платежам, которые выполнялись в промежуток с 15 июня 2005 года по 18 июня 2005 года включительно и стоимость которых превышает 10.00.
+Получите количество фильмов, продолжительность которых больше средней продолжительности всех фильмов.
 ```
 
 ```sql
-SELECT *
-FROM payments
-WHERE payment_date BETWEEN '2005-06-15' AND '2005-06-18'
-  AND amount > 10.00;
+SELECT COUNT(1) AS count_of_movies
+FROM film f
+WHERE (SELECT AVG(f2.`length`) FROM film f2) < f.`length` ;
 
-+------------+-------------+----------+-----------+--------+---------------------+---------------------+
-| payment_id | customer_id | staff_id | rental_id | amount | payment_date        | last_update         |
-+------------+-------------+----------+-----------+--------+---------------------+---------------------+
-|        908 |          33 |        1 |      1301 |  10.99 | 2005-06-15 09:46:33 | 2006-02-15 22:12:36 |
-|       7017 |         260 |        1 |      2091 |  10.99 | 2005-06-17 18:09:04 | 2006-02-15 22:14:58 |
-|       8272 |         305 |        1 |      2166 |  11.99 | 2005-06-17 23:51:21 | 2006-02-15 22:15:47 |
-|      13892 |         516 |        1 |      1718 |  10.99 | 2005-06-16 14:52:02 | 2006-02-15 22:20:47 |
-|      14620 |         544 |        2 |      1434 |  10.99 | 2005-06-15 18:30:46 | 2006-02-15 22:21:35 |
-|      15313 |         572 |        2 |      1889 |  10.99 | 2005-06-17 04:05:12 | 2006-02-15 22:22:22 |
-+------------+-------------+----------+-----------+--------+---------------------+---------------------+
+count_of_movies|
+---------------+
+            489|
 ```
 
 ---
@@ -74,69 +69,63 @@ WHERE payment_date BETWEEN '2005-06-15' AND '2005-06-18'
 ### Задание 3
 
 ```
-Получите последние пять аренд фильмов.
+Получите информацию, за какой месяц была получена наибольшая сумма платежей, и добавьте информацию по количеству аренд за этот месяц.
 ```
 
 ```sql
-SELECT * FROM rental ORDER BY rental_id DESC LIMIT 5;
+SELECT MONTHNAME(p.payment_date) AS month, COUNT(p.rental_id) AS rental_count, SUM(p.amount) AS total_amount
+FROM payment p
+GROUP BY MONTHNAME(p.payment_date)
+HAVING SUM(p.amount) = (
+	SELECT
+		MAX(monthly_total)
+	FROM (
+		SELECT
+			SUM(p2.amount) AS monthly_total
+		FROM
+			payment p2
+		GROUP BY
+			MONTHNAME(p2.payment_date)
+		) AS monthly_totals
+) ;
 
-+-----------+---------------------+--------------+-------------+---------------------+----------+---------------------+
-| rental_id | rental_date         | inventory_id | customer_id | return_date         | staff_id | last_update         |
-+-----------+---------------------+--------------+-------------+---------------------+----------+---------------------+
-|     16049 | 2005-08-23 22:50:12 |         2666 |         393 | 2005-08-30 01:01:12 |        2 | 2006-02-15 21:30:53 |
-|     16048 | 2005-08-23 22:43:07 |         2019 |         103 | 2005-08-31 21:33:07 |        1 | 2006-02-15 21:30:53 |
-|     16047 | 2005-08-23 22:42:48 |         2088 |         114 | 2005-08-25 02:48:48 |        2 | 2006-02-15 21:30:53 |
-|     16046 | 2005-08-23 22:26:47 |         4364 |          74 | 2005-08-27 18:02:47 |        2 | 2006-02-15 21:30:53 |
-|     16045 | 2005-08-23 22:25:26 |          772 |          14 | 2005-08-25 23:54:26 |        1 | 2006-02-15 21:30:53 |
-+-----------+---------------------+--------------+-------------+---------------------+----------+---------------------+
+month|rental_count|total_amount|
+-----+------------+------------+
+July |        6709|    28368.91|
 ```
 
 ### Задание 4
 
 ```
-Одним запросом получите активных покупателей, имена которых Kelly или Willie.
-
-Сформируйте вывод в результат таким образом:
-
-все буквы в фамилии и имени из верхнего регистра переведите в нижний регистр,
-замените буквы 'll' в именах на 'pp'.
+Посчитайте количество продаж, выполненных каждым продавцом. Добавьте вычисляемую колонку «Премия». Если количество продаж превышает 8000, то значение в колонке будет «Да», иначе должно быть значение «Нет».
 ```
 
 ```sql
-SELECT REPLACE(LOWER(first_name), 'll', 'pp') AS first_name, LOWER(last_name) AS last_name FROM customer WHERE active = 1 AND first_name IN ('Kelly', 'Willie');
+SELECT COUNT(p.payment_date) AS payments_count,
+	CASE
+		WHEN COUNT(p.payment_date) > 8000 THEN 'Да'
+		WHEN COUNT(p.payment_date) < 8000 THEN 'Нет'
+	END AS 'Премия'
+FROM payment p
+INNER JOIN staff s on s.staff_id = p.staff_id
+GROUP BY s.staff
 
-+------------+-----------+
-| first_name | last_name |
-+------------+-----------+
-| keppy      | torres    |
-| wippie     | howell    |
-| wippie     | markham   |
-| keppy      | knott     |
-+------------+-----------+
+payments_count|Премия|
+--------------+------+
+          8054|Да    |
+          7990|Нет   |
 ```
 
 ### Задание 5
 
 ```
-Выведите Email каждого покупателя, разделив значение Email на две отдельных колонки: в первой колонке должно быть значение, указанное до @, во второй — значение, указанное после @.
+Найдите фильмы, которые ни разу не брали в аренду.
 ```
 
 ```sql
-SELECT
-    SUBSTRING_INDEX(email, '@', 1) AS email_user,
-    SUBSTRING_INDEX(email, '@', -1) AS email_domain
-FROM customers;
-```
-
-### Задание 6
-
-```
-Доработайте запрос из предыдущего задания, скорректируйте значения в новых колонках: первая буква должна быть заглавной, остальные — строчными.
-```
-
-```sql
-SELECT
-    CONCAT(UPPER(LEFT(SUBSTRING_INDEX(email, '@', 1), 1)), LOWER(SUBSTRING(SUBSTRING_INDEX(email, '@', 1), 2))) AS email_user,
-    CONCAT(UPPER(LEFT(SUBSTRING_INDEX(email, '@', -1), 1)), LOWER(SUBSTRING(SUBSTRING_INDEX(email, '@', -1), 2))) AS email_domain
-FROM customers;
+SELECT f.film_id, f.title
+FROM film f
+LEFT JOIN inventory i ON i.film_id  = f.film_id
+LEFT JOIN rental r ON r.inventory_id = i.inventory_id
+WHERE r.rental_id IS NULL;
 ```
