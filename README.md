@@ -73,9 +73,9 @@ count_of_movies|
 ```
 
 ```sql
-SELECT MONTHNAME(p.payment_date) AS month, COUNT(p.rental_id) AS rental_count, SUM(p.amount) AS total_amount
+SELECT DATE_FORMAT(p.payment_date, '%Y-%m') AS month, COUNT(p.rental_id) AS rental_count, SUM(p.amount) AS total_amount
 FROM payment p
-GROUP BY MONTHNAME(p.payment_date)
+GROUP BY DATE_FORMAT(p.payment_date, '%Y-%m')
 HAVING SUM(p.amount) = (
 	SELECT
 		MAX(monthly_total)
@@ -85,13 +85,13 @@ HAVING SUM(p.amount) = (
 		FROM
 			payment p2
 		GROUP BY
-			MONTHNAME(p2.payment_date)
+			DATE_FORMAT(p2.payment_date, '%Y-%m')
 		) AS monthly_totals
 ) ;
 
-month|rental_count|total_amount|
------+------------+------------+
-July |        6709|    28368.91|
+month  |rental_count|total_amount|
+-------+------------+------------+
+2005-07|        6709|    28368.91|
 ```
 
 ### Задание 4
