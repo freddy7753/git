@@ -1,4 +1,4 @@
-# Домашнее задание к занятию "`SQL. Часть 2`" - `Наурзгалиев Фарид`
+# Домашнее задание к занятию "`Индексы`" - `Наурзгалиев Фарид`
 
 ### Инструкция по выполнению домашнего задания
 
@@ -24,26 +24,19 @@
 ### Задание 1
 
 ```
-Одним запросом получите информацию о магазине, в котором обслуживается более 300 покупателей, и выведите в результат следующую информацию:
-
-фамилия и имя сотрудника из этого магазина;
-город нахождения магазина;
-количество пользователей, закреплённых в этом магазине.
+Напишите запрос к учебной базе данных, который вернёт процентное отношение общего размера всех индексов к общему размеру всех таблиц.
 ```
 
-```sql
-SELECT CONCAT(s2.first_name, ' ', s2.last_name) AS name, c.city, COUNT(c2.customer_id) AS customers_count
-FROM store s
-INNER JOIN staff s2 ON s.store_id = s2.store_id
-INNER JOIN address a ON s.address_id = a.address_id
-INNER JOIN city c ON a.city_id = c.city_id
-INNER JOIN customer c2 ON s.store_id  = c2.store_id
-GROUP BY s2.first_name, s2.last_name, c.city
-HAVING COUNT(c2.customer_id) > 300;
+### Решение 1
 
-name        |city      |customers_count|
-------------+----------+---------------+
-Mike Hillyer|Lethbridge|            326|
+```sql
+SELECT ROUND((SUM(INDEX_LENGTH) / SUM(DATA_LENGTH)) * 100) percent
+FROM INFORMATION_SCHEMA.TABLES
+WHERE TABLE_SCHEMA = 'sakila';
+
+percent|
+-------+
+     53|
 ```
 
 ---
@@ -51,81 +44,94 @@ Mike Hillyer|Lethbridge|            326|
 ### Задание 2
 
 ```sh
-Получите количество фильмов, продолжительность которых больше средней продолжительности всех фильмов.
+Выполните explain analyze следующего запроса:
 ```
 
 ```sql
-SELECT COUNT(1) AS count_of_movies
-FROM film f
-WHERE (SELECT AVG(f2.`length`) FROM film f2) < f.`length` ;
+select distinct concat(c.last_name, ' ', c.first_name), sum(p.amount) over (partition by c.customer_id, f.title)
+from payment p, rental r, customer c, inventory i, film f
+where date(p.payment_date) = '2005-07-30' and p.payment_date = r.rental_date and r.customer_id = c.customer_id and i.inventory_id = r.inventory_id
+```
 
-count_of_movies|
----------------+
-            489|
+```
+перечислите узкие места;
+оптимизируйте запрос: внесите корректировки по использованию операторов, при необходимости добавьте индексы.
+```
+
+### Решение 2
+
+```sql
+EXPLAIN ANALYZE
+select distinct
+	concat(c.last_name, ' ', c.first_name),
+	sum(p.amount) over (partition by c.customer_id, f.title)
+from
+	payment p,
+	rental r,
+	customer c,
+	inventory i,
+	film f
+where
+	date(p.payment_date) = '2005-07-30'
+	and p.payment_date = r.rental_date
+	and r.customer_id = c.customer_id
+	and i.inventory_id = r.inventory_id;
+
+
+-> Table scan on <temporary>  (cost=2.5..2.5 rows=0) (actual time=2730..2730 rows=391 loops=1)
+    -> Temporary table with deduplication  (cost=0..0 rows=0) (actual time=2730..2730 rows=391 loops=1)
+        -> Window aggregate with buffering: sum(payment.amount) OVER (PARTITION BY c.customer_id,f.title )   (actual time=1238..2632 rows=642000 loops=1)
+            -> Sort: c.customer_id, f.title  (actual time=1238..1276 rows=642000 loops=1)
+                -> Stream results  (cost=22.6e+6 rows=16.5e+6) (actual time=0.258..959 rows=642000 loops=1)
+                    -> Nested loop inner join  (cost=22.6e+6 rows=16.5e+6) (actual time=0.255..830 rows=642000 loops=1)
+                        -> Nested loop inner join  (cost=20.9e+6 rows=16.5e+6) (actual time=0.252..715 rows=642000 loops=1)
+                            -> Nested loop inner join  (cost=19.3e+6 rows=16.5e+6) (actual time=0.248..598 rows=642000 loops=1)
+                                -> Inner hash join (no condition)  (cost=1.65e+6 rows=16.5e+6) (actual time=0.239..22.7 rows=634000 loops=1)
+                                    -> Filter: (cast(p.payment_date as date) = '2005-07-30')  (cost=1.72 rows=16500) (actual time=0.0172..3.02 rows=634 loops=1)
+                                        -> Table scan on p  (cost=1.72 rows=16500) (actual time=0.0112..2.26 rows=16044 loops=1)
+                                    -> Hash
+                                        -> Covering index scan on f using idx_title  (cost=112 rows=1000) (actual time=0.0251..0.134 rows=1000 loops=1)
+                                -> Covering index lookup on r using rental_date (rental_date=p.payment_date)  (cost=0.969 rows=1) (actual time=624e-6..819e-6 rows=1.01 loops=634000)
+                            -> Single-row index lookup on c using PRIMARY (customer_id=r.customer_id)  (cost=250e-6 rows=1) (actual time=78.6e-6..94.9e-6 rows=1 loops=642000)
+                        -> Single-row covering index lookup on i using PRIMARY (inventory_id=r.inventory_id)  (cost=250e-6 rows=1) (actual time=74.9e-6..91.2e-6 rows=1 loops=642000)
+
+
+
+SELECT DISTINCT
+	CONCAT(c.last_name, ' ', c.first_name) name,
+	SUM(p.amount) amount
+FROM
+	payment p
+	JOIN rental r ON r.rental_id = p.rental_id
+	JOIN customer c ON c.customer_id = r.customer_id
+	JOIN inventory i ON r.inventory_id = i.inventory_id
+	JOIN film f ON i.film_id = f.film_id
+WHERE
+	p.payment_date >= '2005-07-30 00:00:00'
+	AND p.payment_date < '2005-07-31 00:00:00'
+	AND p.payment_date = r.rental_date
+GROUP BY name;
+
+-> Table scan on <temporary>  (actual time=4.14..4.18 rows=391 loops=1)
+    -> Aggregate using temporary table  (actual time=4.14..4.14 rows=391 loops=1)
+        -> Nested loop inner join  (cost=1023 rows=31.7) (actual time=0.0353..3.75 rows=634 loops=1)
+            -> Nested loop inner join  (cost=795 rows=634) (actual time=0.0252..2.26 rows=634 loops=1)
+                -> Nested loop inner join  (cost=573 rows=634) (actual time=0.022..1.58 rows=634 loops=1)
+                    -> Nested loop inner join  (cost=351 rows=634) (actual time=0.0187..0.893 rows=634 loops=1)
+                        -> Filter: ((r.rental_date >= TIMESTAMP'2005-07-30 00:00:00') and (r.rental_date < TIMESTAMP'2005-07-31 00:00:00'))  (cost=129 rows=634) (actual time=0.012..0.231 rows=634 loops=1)
+                            -> Covering index range scan on r using rental_date over ('2005-07-30 00:00:00' <= rental_date < '2005-07-31 00:00:00')  (cost=129 rows=634) (actual time=0.011..0.17 rows=634 loops=1)
+                        -> Single-row index lookup on c using PRIMARY (customer_id=r.customer_id)  (cost=0.25 rows=1) (actual time=929e-6..946e-6 rows=1 loops=634)
+                    -> Single-row index lookup on i using PRIMARY (inventory_id=r.inventory_id)  (cost=0.25 rows=1) (actual time=961e-6..978e-6 rows=1 loops=634)
+                -> Single-row covering index lookup on f using PRIMARY (film_id=i.film_id)  (cost=0.25 rows=1) (actual time=957e-6..974e-6 rows=1 loops=634)
+            -> Filter: (p.payment_date = r.rental_date)  (cost=0.257 rows=0.05) (actual time=0.00192..0.0022 rows=1 loops=634)
+                -> Index lookup on p using fk_payment_rental (rental_id=r.rental_id)  (cost=0.257 rows=1.03) (actual time=0.00181..0.00206 rows=1 loops=634)
+
+Узкие места
+- Вычисление оконной агрегатной функции sum(payment.amount) OVER (PARTITION BY c.customer_id, f.title) с буферизацией может быть ресурсоемким, особенно если объем данных велик. Это может привести к увеличению времени выполнения запроса.
+- Операция сортировки (Sort: c.customer_id, f.title) необходима для правильного применения оконной функции. Однако сортировка больших объемов данных может быть дорогостоящей операцией с точки зрения производительности.
+- Несколько вложенных циклов внутренних соединений (Nested loop inner join) указывают на то, что данные объединяются без использования индексов, что может существенно замедлить выполнение запроса, особенно при работе с большими объемами данных.
+- Полные сканы таблиц (Table scan on p, Table scan on <temporary>) являются одними из самых затратных операций, поскольку они требуют чтения всего объема данных в таблице. Это может быть особенно проблематично для больших таблиц.
+- Большое количество обработанных строк (rows=642000, rows=634000, rows=16044) указывает на то, что запрос обрабатывает большой объем данных, что само по себе может замедлять выполнение.
 ```
 
 ---
-
-### Задание 3
-
-```
-Получите информацию, за какой месяц была получена наибольшая сумма платежей, и добавьте информацию по количеству аренд за этот месяц.
-```
-
-```sql
-SELECT DATE_FORMAT(p.payment_date, '%Y-%m') AS month, COUNT(p.rental_id) AS rental_count, SUM(p.amount) AS total_amount
-FROM payment p
-GROUP BY DATE_FORMAT(p.payment_date, '%Y-%m')
-HAVING SUM(p.amount) = (
-	SELECT
-		MAX(monthly_total)
-	FROM (
-		SELECT
-			SUM(p2.amount) AS monthly_total
-		FROM
-			payment p2
-		GROUP BY
-			DATE_FORMAT(p2.payment_date, '%Y-%m')
-		) AS monthly_totals
-) ;
-
-month  |rental_count|total_amount|
--------+------------+------------+
-2005-07|        6709|    28368.91|
-```
-
-### Задание 4
-
-```
-Посчитайте количество продаж, выполненных каждым продавцом. Добавьте вычисляемую колонку «Премия». Если количество продаж превышает 8000, то значение в колонке будет «Да», иначе должно быть значение «Нет».
-```
-
-```sql
-SELECT COUNT(p.payment_date) AS payments_count,
-	CASE
-		WHEN COUNT(p.payment_date) > 8000 THEN 'Да'
-		WHEN COUNT(p.payment_date) < 8000 THEN 'Нет'
-	END AS 'Премия'
-FROM payment p
-INNER JOIN staff s on s.staff_id = p.staff_id
-GROUP BY s.staff
-
-payments_count|Премия|
---------------+------+
-          8054|Да    |
-          7990|Нет   |
-```
-
-### Задание 5
-
-```
-Найдите фильмы, которые ни разу не брали в аренду.
-```
-
-```sql
-SELECT f.film_id, f.title
-FROM film f
-LEFT JOIN inventory i ON i.film_id  = f.film_id
-LEFT JOIN rental r ON r.inventory_id = i.inventory_id
-WHERE r.rental_id IS NULL;
-```
