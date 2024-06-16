@@ -66,11 +66,11 @@ MySQL
 
 Обнаруженные уязвимости:
 
-![Backdoor Command Execution in vsftpd 2.3.4](https://www.exploit-db.com/exploits/49757)
+[Backdoor Command Execution in vsftpd 2.3.4](https://www.exploit-db.com/exploits/49757)
 
-![Samba 3.0.29 (Client) - 'receive_smb_raw()' Buffer Overflow (PoC)](https://www.exploit-db.com/exploits/5712)
+[Samba 3.0.29 (Client) - 'receive_smb_raw()' Buffer Overflow (PoC)](https://www.exploit-db.com/exploits/5712)
 
-![MySQL 5.0.x - IF Query Handling Remote Denial of Service](https://www.exploit-db.com/exploits/30020)
+[MySQL 5.0.x - IF Query Handling Remote Denial of Service](https://www.exploit-db.com/exploits/30020)
 
 ---
 
