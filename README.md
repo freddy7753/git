@@ -198,6 +198,6 @@ ansible-playbook ansible_zabbix/install_zabbix.yml -i inventory.ini
 ![скрин 4](https://github.com/freddy7753/git/blob/main/img/img4.png)
 ![скрин 5](https://github.com/freddy7753/git/blob/main/img/img5.png)
 
-![Забикс](89.169.150.135/zabbix)
-![Кибана](89.169.159.22:5601)
-![Сайт](84.201.147.21)
+![Забикс](http://89.169.150.135/zabbix)
+![Кибана](http://89.169.159.22:5601)
+![Сайт](http://84.201.147.21)
