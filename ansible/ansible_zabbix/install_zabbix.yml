@@ -1,0 +1,12 @@
+---
+- name: Run MySQL Installation Playbook
+  ansible.builtin.import_playbook: install_mysql.yml
+
+- name: Run Zabbix Server Installation Playbook
+  ansible.builtin.import_playbook: install_zabbix_server.yml
+
+- name: Run Zabbix Web Installation Playbook
+  ansible.builtin.import_playbook: install_zabbix_web.yml
+
+- name: Run Zabbix Agent Installation Playbook
+  ansible.builtin.import_playbook: install_zabbix_agent.yml

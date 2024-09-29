@@ -1,0 +1,55 @@
+- name: Install nginx on webservers
+  hosts: webservers
+  become: yes
+  tasks:
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        
+    - name: Installing nginx
+      apt:
+        name: nginx
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Copy script on servers update_nginx_page.sh
+      copy:
+        src: ./update_nginx_page.sh
+        dest: /tmp/update_nginx_page.sh
+        mode: "0755"
+
+    - name: Update nginx page
+      command: /tmp/update_nginx_page.sh
+
+    - name: Перезапуск Nginx для применения изменений
+      ansible.builtin.systemd:
+        name: nginx
+        state: restarted
+
+    - name: Проверка состояния Nginx
+      ansible.builtin.command:
+        cmd: systemctl status nginx --no-pager
+      register: nginx_status
+
+    - name: Вывод состояния Nginx
+      ansible.builtin.debug:
+        msg: "{{ nginx_status.stdout }}"
+
+    - name: Проверка открытых портов
+      ansible.builtin.shell:
+        cmd: ss -tuln | grep LISTEN
+      register: open_ports
+
+    - name: Вывод открытых портов
+      ansible.builtin.debug:
+        msg: "{{ open_ports.stdout }}"
+
+    - name: Проверка подключений к Nginx
+      ansible.builtin.shell:
+        cmd: ss -tuln | grep ':80'
+      register: nginx_connections
+
+    - name: Вывод подключений к Nginx
+      ansible.builtin.debug:
+        msg: "{{ nginx_connections.stdout }}"

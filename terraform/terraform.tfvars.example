@@ -1,0 +1,10 @@
+cloud_id                 =
+folder_id                = 
+yandex_cloud_token       =
+service_account_key_file = 
+ubuntu_image_2204        = 
+subnet_id_a              = 
+subnet_id_b              = 
+subnet_id_d              = 
+vdc_id                   = 
+security_group_ids       = 

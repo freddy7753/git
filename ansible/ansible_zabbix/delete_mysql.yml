@@ -1,0 +1,21 @@
+---
+- name: Reinstall MySQL server and set root password
+  hosts: zabbix
+  become: yes
+  tasks:
+    - name: Remove MySQL server and related packages
+      apt:
+        name:
+          - mysql*
+        state: absent
+        purge: yes
+        autoremove: yes
+        autoclean: yes
+
+    - name: Remove residual configuration files
+      command: rm -rf /etc/mysql
+      ignore_errors: yes
+
+    - name: Ensure MySQL is removed
+      command: mysql --version
+      ignore_errors: yes

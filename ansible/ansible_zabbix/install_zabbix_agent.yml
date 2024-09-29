@@ -1,0 +1,33 @@
+---
+- name: Install Zabbix Agent2
+  hosts: all
+  become: yes
+
+  vars_files:
+    - zabbix_secrets.yml
+
+  roles:
+    - role: community.zabbix.zabbix_agent
+      vars:
+        zabbix_agent_version: 6.0
+        zabbix_agent2: false
+        zabbix_agent_server: "{{ zabbix_agent_serv }}"
+        zabbix_agent_serveractive: "{{ zabbix_agent_serveract }}"
+        zabbix_api_server_host: "{{ zabbix_api_server }}"
+        zabbix_api_login_user: "{{ zabbix_api_login }}"
+        zabbix_api_login_pass: "{{ zabbix_api_pass }}"
+        zabbix_api_create_hostgroup: false
+        zabbix_api_create_hosts: false
+        # zabbix_agent_host_state: present
+        zabbix_host_groups:
+          - Linux Servers
+        zabbix_agent_link_templates:
+          - Template OS Linux
+          - Apache APP Template
+        zabbix_agent_macros:
+          - macro_key: apache_type
+            macro_value: reverse_proxy
+            macro_type: text
+        zabbix_agent_tags:
+          - tag: environment
+            value: production

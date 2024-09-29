@@ -1,0 +1,51 @@
+---
+- name: Install Zabbix Web
+  hosts: zabbix
+  become: yes
+
+  vars_files:
+    - zabbix_secrets.yml
+
+  roles:
+    - role: community.zabbix.zabbix_web
+      vars:
+        zabbix_web_version: 6.0
+        zabbix_api_server_url: "zabbix"
+        zabbix_timezone: "Europe/Moscow"
+        zabbix_web_http_server: "apache"
+        zabbix_web_create_vhost: true
+        zabbix_web_vhost_port: 80
+        zabbix_web_vhost_tls_port: 443
+        zabbix_web_vhost_listen_ip: "127.0.0.1"
+        zabbix_web_max_execution_time: 60
+        zabbix_web_memory_limit: "256M"
+        zabbix_web_post_max_size: "100M"
+        zabbix_web_upload_max_filesize: "100M"
+        zabbix_web_max_input_time: 60
+        zabbix_server_name: "{{ zabbix_name }}"
+        zabbix_server_database: mysql
+        zabbix_server_hostname: "localhost"
+        zabbix_server_listenport: 10051
+        zabbix_server_dbhost: "localhost"
+        zabbix_server_dbname: "{{ zabbix_dbname }}"
+        zabbix_server_dbuser: "{{ zabbix_dbuser }}"
+        zabbix_server_dbpassword: "{{ zabbix_dbpassword }}"
+        zabbix_server_dbport: 3306
+  tasks:
+    - name: Enable Apache rewrite module
+      ansible.builtin.command: a2enmod rewrite
+
+    - name: Install Russian language pack
+      ansible.builtin.apt:
+        name: language-pack-ru-base
+        state: present
+
+    - name: Install English language pack
+      ansible.builtin.apt:
+        name: language-pack-en-base
+        state: present
+
+    - name: Restart Apache2
+      ansible.builtin.systemd:
+        name: apache2
+        state: restarted

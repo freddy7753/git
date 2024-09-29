@@ -1,0 +1,15 @@
+filebeat.inputs:
+  - type: log
+    enabled: true
+    # Я запущу filebeat в докере и проброшу логи приложения по данному пути
+    paths:
+      - /usr/share/filebeat/access.log
+      - /usr/share/filebeat/error.log
+    # В filebeat мы можем указать доп поля, а затем в logstash вытаскивать их
+    # и делать какую-нибудь доп работу с логами
+    fields:
+      # Название нашего сервиса
+      service: nginx_log
+
+output.logstash:
+  hosts: ["elasticsearch.ru-central1.internal:5044"]

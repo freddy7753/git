@@ -145,4 +145,59 @@ Cоздайте ВМ, разверните на ней Elasticsearch. Устан
 
 ## Решение
 
-asd
+### Terraform
+
+Создаем ресурсы при помощи терраформ
+
+```sh
+terraform validate
+terraform plan
+terraform apply
+```
+
+### Ansible
+
+Добавляем конфиг ssh для доступа к внутреней инфраструктуре через бастион
+
+```sh
+# .ssh/config
+Host bastion
+    HostName <basiton ip>
+    User <username>
+    IdentityFile ~/.ssh/id_rsa
+
+Host *.ru-central1.internal
+    ProxyCommand ssh -W %h:%p bastion
+    User <username>
+    IdentityFile ~/.ssh/id_rsa
+```
+
+```sh
+# Для отладки
+ssh -o ProxyCommand="ssh -W %h:%p <username>@bastion.ru-central1.internal" <username>@zabbix.ru-central1.internal
+```
+
+Разворачиваем окружение при помощи ансибл
+
+```sh
+# Установка nginx
+ansible-playbook ansible_web_nginx/install_nginx.yml -i inventory.ini
+
+# Установка кластера ELK в docker
+ansible-playbook ansible_elk/filebeat/ansible_filebeats.yml -i inventory.ini
+ansible-playbook ansible_elk/elasticsearch_logstash/elasticsearch_logstash.yml -i inventory.ini
+ansible-playbook ansible_elk/kibana/ansible_kibana.yml -i inventory.ini
+
+# Установка забикса
+ansible-playbook ansible_zabbix/install_zabbix.yml -i inventory.ini
+```
+
+![скрин 1](https://github.com/freddy7753/git/blob/main/img/img1.png)
+![скрин 2](https://github.com/freddy7753/git/blob/main/img/img2.png)
+![скрин 3](https://github.com/freddy7753/git/blob/main/img/img3.png)
+![скрин 4](https://github.com/freddy7753/git/blob/main/img/img4.png)
+![скрин 5](https://github.com/freddy7753/git/blob/main/img/img5.png)
+
+![Забикс](89.169.150.135/zabbix)
+![Кибана](89.169.159.22:5601)
+![Сайт](84.201.147.21)

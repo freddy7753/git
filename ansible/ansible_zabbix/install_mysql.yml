@@ -1,0 +1,25 @@
+---
+- name: Install MySQL
+  hosts: zabbix
+  # become: yes
+
+  vars_files:
+    - zabbix_secrets.yml
+
+  roles:
+    - role: geerlingguy.mysql
+      become: yes
+      vars:
+        mysql_root_home: /root
+        mysql_root_username: root
+        mysql_root_password: root
+        mysql_databases:
+          - name: zabbix
+            collation: utf8_bin
+            encoding: utf8
+        mysql_users:
+          - name: zabbix
+            host: "%"
+            password: asdf
+            priv: "zabbix.*:ALL"
+            state: present

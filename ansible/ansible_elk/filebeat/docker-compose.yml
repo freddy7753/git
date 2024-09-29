@@ -1,0 +1,15 @@
+services:
+  beats:
+    image: elastic/filebeat:7.16.1
+    volumes:
+      - ./configs/filebeat/config.yml:/usr/share/filebeat/filebeat.yml:ro
+      # - ./host_metrics_app/:/host_metrics_app/:ro
+      # - ./log_gen/:/log_gen/:ro
+      - /var/log/nginx/access.log:/usr/share/filebeat/access.log:ro
+      - /var/log/nginx/error.log:/usr/share/filebeat/error.log:ro
+    networks:
+      - elk
+
+networks:
+  elk:
+    driver: bridge
